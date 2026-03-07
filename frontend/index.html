@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AI Voice Agent</title>
+  <link rel="stylesheet" href="/css/style.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
+</head>
+<body>
+  <header class="header">
+    <h1>AI Voice Agent</h1>
+    <div class="status">
+      <div class="status-dot" id="status-dot"></div>
+      <span id="status-text">Disconnected</span>
+    </div>
+  </header>
+
+  <div class="transcript-area" id="transcript"></div>
+
+  <div class="controls">
+    <button class="mic-btn idle" id="mic-btn">
+      <span id="mic-icon">&#x1F399;</span>
+    </button>
+    <span class="state-label" id="state-label">Click to start</span>
+  </div>
+
+  <script type="module" src="/js/app.js"></script>
+</body>
+</html>
