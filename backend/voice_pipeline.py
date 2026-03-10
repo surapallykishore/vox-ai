@@ -1,12 +1,17 @@
 import asyncio
 import json
 import logging
+import time
 
 from .stt import DeepgramSTT
 from .tts_manager import TTSManager
 from .llm import LLMStream
 
 logger = logging.getLogger(__name__)
+
+# Ignore barge-in for this many seconds after TTS starts speaking,
+# to avoid echo from the speaker triggering false interruptions.
+BARGE_IN_GRACE_PERIOD = 1.5
 
 
 class VoicePipeline:
@@ -25,6 +30,7 @@ class VoicePipeline:
         self._tts = TTSManager()
         self._llm = LLMStream()
         self._is_speaking = False  # True while TTS audio is being sent
+        self._speaking_since = 0.0  # timestamp when TTS audio started
         self._current_gen_task = None
         self._running = False
 
@@ -76,6 +82,12 @@ class VoicePipeline:
         if not self._is_speaking:
             return
 
+        # Ignore barge-in shortly after TTS starts — likely speaker echo
+        elapsed = time.monotonic() - self._speaking_since
+        if elapsed < BARGE_IN_GRACE_PERIOD:
+            logger.debug(f"Ignoring barge-in (echo grace period, {elapsed:.1f}s)")
+            return
+
         logger.info("Barge-in detected — interrupting AI response")
 
         # Cancel LLM generation
@@ -95,6 +107,8 @@ class VoicePipeline:
 
     async def _on_tts_audio(self, pcm_bytes: bytes):
         """Called when TTS produces an audio chunk."""
+        if not self._is_speaking:
+            self._speaking_since = time.monotonic()
         self._is_speaking = True
         logger.info(f"TTS audio chunk: {len(pcm_bytes)} bytes")
         try:
